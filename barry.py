@@ -133,7 +133,6 @@ def handle (bot, event):
 			l = ' '.join (x.lower ().split ()[1:])
 
 			if re.search (r'<@{}>'.format (bot.id), x) and len (l) > 0:
-				print ('HERE!')
 				if k in _HELLO:
 					bot.sc.api_call (
 						'chat.postMessage',
