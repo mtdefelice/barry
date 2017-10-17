@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euxo pipefail
 
-/bin/sleep 10
+export PATH=$PATH:/bin
+sleep 900
 

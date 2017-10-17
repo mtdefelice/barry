@@ -21,6 +21,7 @@ _HELLO = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ no
 	'Hello.',
 	'Hi.',
 	'Hey.',
+	'Hola.',
 ]}
 
 _ABOUT = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ not in _SW]) for _ in [
@@ -32,9 +33,12 @@ _ABOUT = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ no
 	'Help me please!',
 	'Can you please help me!',
 	'How can you help me?',
-	'What commands can you do?',
+	'What commands can you run?',
+	'What commands can you execute?',
 	'What commands do you know?',
 	'What scripts can you run?',
+	'What scripts can you execute?',
+	'What scripts do you know?',
 ]}
 
 _TRAIN = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ not in _SW]) for _ in [
@@ -47,6 +51,14 @@ _LEARN = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ no
 	'Learn.',
 	'Stop training.',
 	'Stop learning.',
+]}
+
+_SCANS = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ not in _SW]) for _ in [
+	'Scan.',
+	'Rescan.',
+	'Rescan scripts.',
+	'Refresh.',
+	'Refresh scripts.',
 ]}
 
 _STATS = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ not in _SW]) for _ in [
@@ -170,6 +182,15 @@ def handle (bot, event):
 						text = 'I know the following *{} command{}*. Each will run a script in the background: `{}`'.format (len (bot.scripts.keys ()), '' if len (bot.scripts.keys ()) == 1 else 's', [_.title () for _ in bot.scripts.keys ()])
 					)
 
+				elif k in _SCANS:
+					bot.scripts = bot.get_scripts ()
+					bot.sc.api_call (
+						'chat.postMessage',
+						as_user = True,
+						channel = c,
+						text = 'Done!',
+					)
+
 				elif k in _STATS:
 					n = len (bot.tasks)
 					w = datetime.utcnow ()
@@ -193,6 +214,7 @@ def handle (bot, event):
 							text = "I'm not very busy at the moment.",
 						)
 
+				# Run scripts
 				elif l in bot.scripts.keys (): 
 					bot.tasks.append (Task (
 						p = subprocess.Popen (['/bin/bash', 'scripts/' + bot.scripts[l]], stdout = subprocess.PIPE),

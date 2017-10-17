@@ -2,6 +2,5 @@
 set -euxo pipefail
 
 export PATH=$PATH:/bin
-
-sleep 15
+sleep 300
 
