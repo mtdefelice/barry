@@ -9,12 +9,13 @@ import time
 import re
 import os
 
-_BOT_USERNAME = 'barry'
+# This script's name must be the associated Slack bot's username e.g. barry.py
+_BOT_USERNAME = os.path.splitext (__file__)[0].lower ()
 
 _SW = stopwords.words ('english')
 _SW.extend ([
 	'please',
-	_BOT_USERNAME.lower (),
+	_BOT_USERNAME,
 ])
 
 _HELLO = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ not in _SW]) for _ in [
