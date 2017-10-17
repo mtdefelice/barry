@@ -1,0 +1,4 @@
+*.py[cod]
+run.sh
+db.sqlite3
+venv
