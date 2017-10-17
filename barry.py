@@ -9,10 +9,12 @@ import time
 import re
 import os
 
+_BOT_USERNAME = 'barry'
+
 _SW = stopwords.words ('english')
 _SW.extend ([
 	'please',
-	'barry',
+	_BOT_USERNAME.lower (),
 ])
 
 _HELLO = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ not in _SW]) for _ in [
@@ -229,7 +231,7 @@ def handle (bot, event):
 					)
 
 if __name__ == '__main__':
-	bot = Bot (name = 'barry', token = os.environ.get ('SLACK_BOT_TOKEN'))
+	bot = Bot (name = _BOT_USERNAME, token = os.environ.get ('SLACK_BOT_TOKEN'))
 	while True:
 		w = datetime.utcnow ()
 		for task in bot.tasks:
