@@ -20,6 +20,7 @@ _SX = [
 ]
 
 _SW.extend (_SX)
+_SW.remove ('doing')
 
 _HELLO = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ not in _SW]) for _ in [
 	'Hello.',
@@ -69,6 +70,8 @@ _SCANS = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ no
 
 _STATS = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ not in _SW]) for _ in [
 	'Status.',
+	'What are you doing?',
+	'What are you working on?',
 ]}
 
 class Bot:
@@ -156,7 +159,7 @@ def handle (bot, event):
 				l = ' '.join (x.lower ().split ())
 				m = ' '.join ([_ for _ in re.sub (r'[\W_]', ' ', l).split () if _ not in _SX])
 
-				if k in _HELLO:
+				if k and k in _HELLO:
 					bot.sc.api_call (
 						'chat.postMessage',
 						as_user = True,
@@ -164,15 +167,7 @@ def handle (bot, event):
 						text = 'Hello!',
 					)
 
-				elif k in _ABOUT:
-					bot.sc.api_call (
-						'chat.postMessage',
-						as_user = True,
-						channel = c,
-						text = 'I know the following *{} command{}*. Each will run a script in the background: `{}`'.format (len (bot.scripts.keys ()), '' if len (bot.scripts.keys ()) == 1 else 's', [_.title () for _ in bot.scripts.keys ()])
-					)
-
-				elif k in _SCANS:
+				elif k and k in _SCANS:
 					bot.scripts = bot.get_scripts ()
 					bot.sc.api_call (
 						'chat.postMessage',
@@ -181,7 +176,7 @@ def handle (bot, event):
 						text = 'Done!',
 					)
 
-				elif k in _STATS:
+				elif k and k in _STATS:
 					n = len (bot.tasks)
 					w = datetime.utcnow ()
 					if n:
@@ -204,22 +199,15 @@ def handle (bot, event):
 							text = "I'm not very busy at the moment.",
 						)
 
-				# Run scripts ... strip extended stopwords before mapping thre command
-				elif m in bot.scripts.keys (): 
-					bot.tasks.append (Task (
-						p = subprocess.Popen (['/bin/bash', 'scripts/' + bot.scripts[m]], stdout = subprocess.PIPE),
-						c = c,
-						u = u,
-					))
-
+				elif k and k in _ABOUT:
 					bot.sc.api_call (
 						'chat.postMessage',
 						as_user = True,
 						channel = c,
-						text = "Started! I'll let you know when I'm done.",
+						text = 'I know the following *{} command{}*. Each will run a script in the background: `{}`'.format (len (bot.scripts.keys ()), '' if len (bot.scripts.keys ()) == 1 else 's', [_.title () for _ in bot.scripts.keys ()])
 					)
 
-				elif k in _TRAIN:
+				elif k and k in _TRAIN:
 					if not d:
 						bot.train[c] = {'is_training': True, 'data': []}
 						bot.sc.api_call (
@@ -237,7 +225,7 @@ def handle (bot, event):
 							text = "I'm sorry but I cannot be trained via DMs. Please ask me again from a channel.",
 						)
 
-				elif k in _LEARN:
+				elif k and k in _LEARN:
 					if not d:
 						bot.cb.train (bot.train.get (c, {}).get ('data'))
 						bot.train[c] = {'is_training': False, 'data': []}
@@ -254,6 +242,21 @@ def handle (bot, event):
 							channel = c,
 							text = "I'm sorry but I've found there is little I can learn from myself. Please ask me again from a channel.",
 						)
+
+				# Run scripts ... strip extended stopwords before mapping thre command
+				elif m in bot.scripts.keys (): 
+					bot.tasks.append (Task (
+						p = subprocess.Popen (['/bin/bash', 'scripts/' + bot.scripts[m]], stdout = subprocess.PIPE),
+						c = c,
+						u = u,
+					))
+
+					bot.sc.api_call (
+						'chat.postMessage',
+						as_user = True,
+						channel = c,
+						text = "Started! I'll let you know when I'm done.",
+					)
 
 				else:
 					# Respond
