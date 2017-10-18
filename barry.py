@@ -13,10 +13,13 @@ import os
 _BOT_USERNAME = os.path.splitext (__file__)[0].lower ()
 
 _SW = stopwords.words ('english')
-_SW.extend ([
+_SX = [
 	'please',
+	'now',
 	_BOT_USERNAME,
-])
+]
+
+_SW.extend (_SX)
 
 _HELLO = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ not in _SW]) for _ in [
 	'Hello.',
@@ -26,6 +29,8 @@ _HELLO = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ no
 ]}
 
 _ABOUT = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ not in _SW]) for _ in [
+	'List.',
+	'List commands.',
 	'What can you do?',
 	'What are you able to do?',
 	'What do you know?',
@@ -146,6 +151,7 @@ def handle (bot, event):
 		if y == 'message' and x and u != bot.id:
 			k = tuple ([_ for _ in re.sub (r'[\W_]', ' ', x).lower ().split () if _ not in _SW])[1:]
 			l = ' '.join (x.lower ().split ()[1:])
+			m = ' '.join ([_ for _ in re.sub (r'[\W_]', ' ', l).lower ().split () if _ not in _SX])
 
 			if re.search (r'<@{}>'.format (bot.id), x) and len (l) > 0:
 				if k in _HELLO:
@@ -215,10 +221,10 @@ def handle (bot, event):
 							text = "I'm not very busy at the moment.",
 						)
 
-				# Run scripts
-				elif l in bot.scripts.keys (): 
+				# Run scripts ... strip extended stopwords before mapping thre command
+				elif m in bot.scripts.keys (): 
 					bot.tasks.append (Task (
-						p = subprocess.Popen (['/bin/bash', 'scripts/' + bot.scripts[l]], stdout = subprocess.PIPE),
+						p = subprocess.Popen (['/bin/bash', 'scripts/' + bot.scripts[m]], stdout = subprocess.PIPE),
 						c = c,
 						u = u,
 					))
@@ -259,11 +265,13 @@ if __name__ == '__main__':
 		w = datetime.utcnow ()
 		for task in bot.tasks:
 			if task.p.poll () is not None:
+				(stdout, stderr) = task.p.communicate ()
+
 				bot.sc.api_call (
 					'chat.postMessage',
 					as_user = True,
 					channel = task.c,
-					text = "<@{}> *Done!* I've completed the task `{}`. It completed in _{:.2f} seconds_ and exited with a status of _{}_.".format (task.u, task.p.args, (w - task.t).total_seconds (), task.p.returncode)
+					text = "<@{}> *Done!* I've completed the task `{}`. It completed in _{:.2f} seconds_, exited with a status of _{}_, and returned {}".format (task.u, task.p.args, (w - task.t).total_seconds (), task.p.returncode, 'the following: ```' + stdout.decode () + '```' if stdout else '_nothing_.')
 				)
 
 				bot.tasks.remove (task)
