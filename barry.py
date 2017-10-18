@@ -271,7 +271,8 @@ if __name__ == '__main__':
 					'chat.postMessage',
 					as_user = True,
 					channel = task.c,
-					text = "<@{}> *Done!* I've completed the task `{}`. It completed in _{:.2f} seconds_, exited with a status of _{}_, and returned {}".format (task.u, task.p.args, (w - task.t).total_seconds (), task.p.returncode, 'the following: ```' + stdout.decode () + '```' if stdout else '_nothing_.')
+					text = "<@{}> *Done!* I've completed the task `{}`. It completed in _{:.2f} seconds_ and exited with a status of _{}_.".format (task.u, task.p.args, (w - task.t).total_seconds (), task.p.returncode)
+					# text = "<@{}> *Done!* I've completed the task `{}`. It completed in _{:.2f} seconds_, exited with a status of _{}_, and returned {}".format (task.u, task.p.args, (w - task.t).total_seconds (), task.p.returncode, 'the following: ```' + stdout.decode () + '```' if stdout else '_nothing_.')
 				)
 
 				bot.tasks.remove (task)
