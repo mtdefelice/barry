@@ -149,36 +149,19 @@ def handle (bot, event):
 		x = event.get ('text', '')
 
 		if y == 'message' and x and u != bot.id:
-			k = tuple ([_ for _ in re.sub (r'[\W_]', ' ', x).lower ().split () if _ not in _SW])[1:]
-			l = ' '.join (x.lower ().split ()[1:])
-			m = ' '.join ([_ for _ in re.sub (r'[\W_]', ' ', l).lower ().split () if _ not in _SX])
+			d = c[0].lower () == 'd'
+			if re.search (r'^<@{}>'.format (bot.id), x) or d:
+				x = re.sub (r'^<@[^>]+>\s*', '', x)
+				k = tuple ([_ for _ in re.sub (r'[\W_]', ' ', x).lower ().split () if _ not in _SW])
+				l = ' '.join (x.lower ().split ())
+				m = ' '.join ([_ for _ in re.sub (r'[\W_]', ' ', l).split () if _ not in _SX])
 
-			if re.search (r'<@{}>'.format (bot.id), x) and len (l) > 0:
 				if k in _HELLO:
 					bot.sc.api_call (
 						'chat.postMessage',
 						as_user = True,
 						channel = c,
 						text = 'Hello!',
-					)
-
-				elif k in _TRAIN:
-					bot.train[c] = {'is_training': True, 'data': []}
-					bot.sc.api_call (
-						'chat.postMessage',
-						as_user = True,
-						channel = c,
-						text = "Training myself for better conversations. I'll be listening to this channel's chatter until you ask me to learn from it.",
-					)
-
-				elif k in _LEARN:
-					bot.cb.train (bot.train.get (c, {}).get ('data'))
-					bot.train[c] = {'is_training': False, 'data': []}
-					bot.sc.api_call (
-						'chat.postMessage',
-						as_user = True,
-						channel = c,
-						text = 'Done!',
 					)
 
 				elif k in _ABOUT:
@@ -236,6 +219,42 @@ def handle (bot, event):
 						text = "Started! I'll let you know when I'm done.",
 					)
 
+				elif k in _TRAIN:
+					if not d:
+						bot.train[c] = {'is_training': True, 'data': []}
+						bot.sc.api_call (
+							'chat.postMessage',
+							as_user = True,
+							channel = c,
+							text = "Training myself for better conversations. I'll be listening to this channel's chatter until you ask me to learn from it.",
+						)
+
+					else:
+						bot.sc.api_call (
+							'chat.postMessage',
+							as_user = True,
+							channel = c,
+							text = "I'm sorry but I cannot be trained via DMs. Please ask me again from a channel.",
+						)
+
+				elif k in _LEARN:
+					if not d:
+						bot.cb.train (bot.train.get (c, {}).get ('data'))
+						bot.train[c] = {'is_training': False, 'data': []}
+						bot.sc.api_call (
+							'chat.postMessage',
+							as_user = True,
+							channel = c,
+							text = 'Done!',
+						)
+					else:
+						bot.sc.api_call (
+							'chat.postMessage',
+							as_user = True,
+							channel = c,
+							text = "I'm sorry but I've found there is little I can learn from myself. Please ask me again from a channel.",
+						)
+
 				else:
 					# Respond
 					bot.sc.api_call (
@@ -244,20 +263,11 @@ def handle (bot, event):
 						channel = c,
 						text = pretty (bot.cb.get_response (l).text)
 					)					
-					
+
 			else:
 				# Train
 				if bot.train.get (c, {}).get ('is_training'):
 					bot.train[c]['data'] += [ _.strip () for _ in x.split ('\n') if len (_) > 0 ]
-
-				# Simply respond if in a DM ...
-				if c[0].lower () == 'd':
-					bot.sc.api_call (
-						'chat.postMessage',
-						as_user = True,
-						channel = c,
-						text = pretty (bot.cb.get_response (' '.join (x.split ())).text)
-					)
 
 if __name__ == '__main__':
 	bot = Bot (name = _BOT_USERNAME, token = os.environ.get ('SLACK_BOT_TOKEN'))
