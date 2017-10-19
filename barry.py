@@ -38,6 +38,8 @@ _ABOUT = {tuple ([_ for _ in re.sub (r'[\W_]', ' ', _).lower ().split () if _ no
 	'Help',
 	'Help me!',
 	'Help me please!',
+	'Show.',
+	'Show me.',
 	'Can you please help me!',
 	'How can you help me?',
 	'What commands can you run?',
