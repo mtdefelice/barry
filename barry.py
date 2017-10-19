@@ -83,30 +83,19 @@ class Bot:
 		p = self.sc.api_call ('users.list')
 		return [ _.get ('id') for _ in p.get ('members') if _.get ('name') == name ].pop () if p.get ('ok') else None
 
-	def rtm_connect (self):
-		if not self.rtm_connected:
-			if self.sc.rtm_connect ():
-				self.rtm_connected = True
-				return True
-			else:
-				return False
-		else:
-			return True
-
 	def rtm_read (self):
-		if self.rtm_connect ():
-			try:
+		try:
+			return self.sc.rtm_read ()
+		except:
+			if self.sc.rtm_connect ():
 				return self.sc.rtm_read ()
-			except:
-				self.rtm_connected = False
-		else:
-			return []
+			else:
+				return None
 
 	def __init__ (self, token, name):
 		self.token = token
 		self.sc = SlackClient (token)
 		self.id = self.get_id (name)
-		self.rtm_connected = False
 
 		self.scripts = self.get_scripts ()
 		self.tasks = []
@@ -279,7 +268,6 @@ if __name__ == '__main__':
 		for task in bot.tasks:
 			if task.p.poll () is not None:
 				(stdout, stderr) = task.p.communicate ()
-
 				bot.sc.api_call (
 					'chat.postMessage',
 					as_user = True,
