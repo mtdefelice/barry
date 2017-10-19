@@ -100,7 +100,7 @@ class Bot:
 			except:
 				self.rtm_connected = False
 		else:
-			return None
+			return []
 
 	def __init__ (self, token, name):
 		self.token = token
