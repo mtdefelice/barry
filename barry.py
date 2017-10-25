@@ -195,7 +195,7 @@ def handle (bot, event):
 						'chat.postMessage',
 						as_user = True,
 						channel = c,
-						text = 'I know the following *{} command{}*. Each will run a script in the background: `{}`'.format (len (bot.scripts.keys ()), '' if len (bot.scripts.keys ()) == 1 else 's', [_.title () for _ in bot.scripts.keys ()])
+						text = 'I know the following *{} command{}*. Each will run a script in the background: `{}`'.format (len (bot.scripts.keys ()), '' if len (bot.scripts.keys ()) == 1 else 's', [_.title () for _ in sorted (bot.scripts.keys ())])
 					)
 
 				elif k and k in _TRAIN:
